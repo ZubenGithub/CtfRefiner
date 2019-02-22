@@ -14,7 +14,7 @@
 from pyem import star
 import re
 
-star_file = "run_data_job203_10000lines.star"
+#star_file = "run_data_job203_10000lines.star"
 
 def ReadStarFile(star_file):
     """
@@ -39,6 +39,14 @@ def ReadStarFile(star_file):
     dataframe.columns = new_columns
     return(dataframe)
 
+def WriteStarFile(star_file, df):
+    """
+    Writes a star file from given pandas dataframe.
+    
+    Args:
+        Star file destination, pandas dataframe
+    """
+    return star.write_star(star_file, df)
 
-df= ReadStarFile(star_file)
-print(df.columns)
+#df= ReadStarFile(star_file)
+#print(df.columns)
