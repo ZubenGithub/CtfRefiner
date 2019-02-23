@@ -10,7 +10,9 @@ import matplotlib.pyplot as plt
 import math
 
 # arguments
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
 parser.add_argument('--star_file', help='Star file with micrograph data', default='run_data_job203_10000lines.star')
 parser.add_argument('--MicrographX', help='Micrograph image X size (pixels)', default='5760')
 parser.add_argument('--MicrographY', help='Micrograph image Y size (pixels)', default='4092')
@@ -83,7 +85,7 @@ for i in micrographs:
 #    print(df)
 
     # For visual interpretation of points, uncomment
-    '''
+    
     # plot points and fitted surface
     good = np.array(good)
     bad = np.array(bad)
@@ -92,8 +94,10 @@ for i in micrographs:
     ax.plot_surface(X, Y, Z, rstride=1, cstride=1, alpha=0.2)
 
     ax.scatter(good[:,0], good[:,1], good[:,2], c='b', s=50)
-    ax.scatter(bad[:,0], bad[:,1], bad[:,2], c='r', s=50)
-
+    if len(bad) == 0:
+        pass
+    else:
+        ax.scatter(bad[:,0], bad[:,1], bad[:,2], c='r', s=50)
 
     plt.xlabel('MicrographX')
     plt.ylabel('MicrographY')
@@ -101,7 +105,7 @@ for i in micrographs:
     ax.axis('equal')
     ax.axis('tight')
     plt.show()
-    '''
+   
 
 WriteStarFile(p.star_file + '_bad.star', bad_df)
 WriteStarFile(p.star_file + '_good.star', df)
