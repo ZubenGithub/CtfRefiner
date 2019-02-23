@@ -90,8 +90,10 @@ for i in micrographs:
     # For visual interpretation of points, uncomment
     
     # plot points and fitted surface
+    # Currently only showing removed particles
     good = np.array(good)
     bad = np.array(bad)
+
     if len(bad) == 0:  # This prevents an error if bad has length 0
         pass
     else:
