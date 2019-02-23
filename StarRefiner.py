@@ -22,6 +22,9 @@ p = parser.parse_args()
 # Star file read into a pandas dataframe
 df = ReadStarFile(p.star_file)
 
+# dataframe to store 'bad' particles
+bad_df = pd.DataFrame()
+
 # Specific values of the df are selected and converted to np array for convenience
 arr = df.sort_values(by='MicrographName').loc[:, ['MicrographName', 'CoordinateX', 'CoordinateY', 'DefocusV']].to_numpy()
 
@@ -33,11 +36,7 @@ for i in arr:
     micrographs[i[0]].append(i[1:4])
 
 for i in micrographs:
-    particles = []
-    for particle in micrographs[i]:
-        particles.append(particle)
-
-    data = np.array(particles, dtype=np.float)
+    data = np.array(micrographs[i], dtype=np.float)
 
     x = data[:,0]
     # regular grid covering the domain of the data
@@ -51,7 +50,7 @@ for i in micrographs:
 
     # evaluate it on grid
     Z = C[0]*X + C[1]*Y + C[2]
-    print ("%f x + %f y + %f = z" % (C[0], C[1], C[2]))
+    print ('%f x + %f y + %f = z' % (C[0], C[1], C[2]))
 
     def shortest_distance(x1, y1, z1, a, b, c, d):  
         d = abs((a * x1 + b * y1 + c * z1 + d))  
@@ -59,7 +58,6 @@ for i in micrographs:
         return d/e
 
     # classification
-    bad_df = pd.DataFrame()
     good = []
     bad = []
     for i in data:
