@@ -10,6 +10,9 @@ import matplotlib.pyplot as plt
 import math
 
 # arguments
+# Add option to show scatterplot
+# Add option to only show scatterplot when removing a particle
+
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
@@ -72,14 +75,14 @@ for i in micrographs:
     # classification
     good = []
     bad = []
-    for i in data:
-        if shortest_distance(i[0], i[1], i[2], C[0], C[1], -1, C[2]) > float(p.threshold):
-            bad.append(i)
-            df_loc = df.loc[(df['CoordinateX'] == i[0]) & (df['CoordinateY'] == i[1]) & (df['DefocusV'] == i[2])]
+    for j in data:
+        if shortest_distance(j[0], j[1], j[2], C[0], C[1], -1, C[2]) > float(p.threshold):
+            bad.append(j)
+            df_loc = df.loc[(df['CoordinateX'] == j[0]) & (df['CoordinateY'] == j[1]) & (df['DefocusV'] == j[2])]
             df = (df.drop(df_loc.index))
             bad_df = bad_df.append(df_loc)
         else:
-            good.append(i)
+            good.append(j)
 
 #    print(bad_df)
 #    print(df)
@@ -89,22 +92,22 @@ for i in micrographs:
     # plot points and fitted surface
     good = np.array(good)
     bad = np.array(bad)
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    ax.plot_surface(X, Y, Z, rstride=1, cstride=1, alpha=0.2)
-
-    ax.scatter(good[:,0], good[:,1], good[:,2], c='b', s=50)
-    if len(bad) == 0:
+    if len(bad) == 0:  # This prevents an error if bad has length 0
         pass
     else:
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        ax.plot_surface(X, Y, Z, rstride=1, cstride=1, alpha=0.2)
         ax.scatter(bad[:,0], bad[:,1], bad[:,2], c='r', s=50)
-
-    plt.xlabel('MicrographX')
-    plt.ylabel('MicrographY')
-    ax.set_zlabel('Defocus')
-    ax.axis('equal')
-    ax.axis('tight')
-    plt.show()
+        ax.scatter(good[:,0], good[:,1], good[:,2], c='b', s=50)
+        plt.xlabel('MicrographX')
+        plt.ylabel('MicrographY')
+        ax.set_zlabel('Defocus')
+        ax.axis('equal')
+        ax.axis('tight')
+        ax.set_title(i) # Shows the micrograph title
+        print(i) # Since the micrograph title is often long also print it in terminal
+        plt.show()
    
 
 WriteStarFile(p.star_file + '_bad.star', bad_df)
