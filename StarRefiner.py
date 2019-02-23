@@ -22,11 +22,21 @@ p = parser.parse_args()
 # Star file read into a pandas dataframe
 df = ReadStarFile(p.star_file)
 
+"""
+For some operating systems the pyem starfile reader includes an underscore in the name.
+e.g., MicrographName is stored as _MicrographName
+This means that df.sort_values doesn't work
+"""
+if df.columns[0].startswith('_') == True:
+    df.columns=df.columns.str.replace('_','')
+else:
+    pass
+
 # dataframe to store 'bad' particles
 bad_df = pd.DataFrame()
 
 # Specific values of the df are selected and converted to np array for convenience
-arr = df.sort_values(by='MicrographName').loc[:, ['MicrographName', 'CoordinateX', 'CoordinateY', 'DefocusV']].to_numpy()
+arr = df.sort_values(by='MicrographName').loc[:, ['MicrographName', 'CoordinateX', 'CoordinateY', 'DefocusV']].values
 
 # dictionary of micrographs
 micrographs = {}
@@ -69,8 +79,8 @@ for i in micrographs:
         else:
             good.append(i)
 
-    print(bad_df)
-    print(df)
+#    print(bad_df)
+#    print(df)
 
     # For visual interpretation of points, uncomment
     '''
