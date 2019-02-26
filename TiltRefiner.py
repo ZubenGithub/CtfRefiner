@@ -34,7 +34,6 @@
 #%      Requires pyem package from: https://github.com/asarnow/pyem/wiki/Install-pyem
 # ------------------------------------------------------------------
 
-from ReadStarFile import ReadStarFile, WriteStarFile
 import argparse
 
 import pandas as pd 
@@ -45,9 +44,44 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import math
 
+from pyem import star
+import re
+
 # arguments
 # Add option to show scatterplot
 # Add option to only show scatterplot when removing a particle
+
+def ReadStarFile(star_file):
+    """
+    Reads a star file and returns a pandas dataframe.
+        NB: I need to test the different programs that it can read.
+    Args:
+        Star file
+    Returns:
+        Pandas Dataframe
+    """
+    dataframe = star.parse_star(star_file)
+    columns = dataframe.columns
+    new_columns = []
+    # Change column names to general column names (without numbers)
+    # Just parses the header and finds the names
+    for column in columns:
+        no_number = column.split()[0]
+        new_column_name = re.sub('rln','',no_number) #NB: removed _
+        new_columns.append(new_column_name)
+
+    # Renames the columns with the neater and nicer names
+    dataframe.columns = new_columns
+    return(dataframe)
+
+def WriteStarFile(star_file, df):
+    """
+    Writes a star file from given pandas dataframe.
+    
+    Args:
+        Star file destination, pandas dataframe
+    """
+    return star.write_star(star_file, df)
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter
