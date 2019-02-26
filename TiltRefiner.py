@@ -25,13 +25,17 @@ import math
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-parser.add_argument('--star_file', help='Star file with micrograph data', default='run_data_job203_10000lines.star')
-parser.add_argument('--MicrographX', help='Micrograph image X size (pixels)', default='5760')
+parser.add_argument('--star_file', help='Star file with micrograph data', required=True)
+parser.add_argument('--MicrographX', help='Micrograph image X size (pixels). Default is for K3 image.', default='5760')
 parser.add_argument('--MicrographY', help='Micrograph image Y size (pixels)', default='4092')
-# Currently unused
-#parser.add_argument('-p','--ang_pix', help='Pixel to angstrom conversion factor', default='0.95')
-parser.add_argument('--threshold', help='Threshold for filtering out "bad" particles', default='400')
-parser.add_argument('--showplot', help='Plot bad particles', action="store_true", default=False)
+parser.add_argument('--threshold',
+                  help='Threshold in Angstroms for filtering out "bad" particles. Should correspond to thickness of ice.',
+                  default=(1000),
+                  type=int)
+parser.add_argument('--showplot',
+                  help='Plot micrographs that contain any particles outside threshold. Useful for finding appropriate threshold',
+                  action="store_true",
+                  default=False)
 
 args = parser.parse_args()
 
