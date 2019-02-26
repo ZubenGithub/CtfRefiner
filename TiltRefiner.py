@@ -1,3 +1,12 @@
+"""
+  StarRefiner.py
+
+  After the per particle defocus has been estimated the general plane
+  that all particles lie upon. Then particles that are some threshold
+  outside that plane can be removed.
+
+"""
+
 from ReadStarFile import ReadStarFile, WriteStarFile
 import argparse
 
@@ -19,13 +28,15 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--star_file', help='Star file with micrograph data', default='run_data_job203_10000lines.star')
 parser.add_argument('--MicrographX', help='Micrograph image X size (pixels)', default='5760')
 parser.add_argument('--MicrographY', help='Micrograph image Y size (pixels)', default='4092')
-parser.add_argument('--pixel_to_angstrom', help='Pixel to angstrom conversion factor', default='0.95')
+# Currently unused
+#parser.add_argument('-p','--ang_pix', help='Pixel to angstrom conversion factor', default='0.95')
 parser.add_argument('--threshold', help='Threshold for filtering out "bad" particles', default='400')
+parser.add_argument('--showplot', help='Plot bad particles', action="store_true", default=False)
 
-p = parser.parse_args()
+args = parser.parse_args()
 
 # Star file read into a pandas dataframe
-df = ReadStarFile(p.star_file)
+df = ReadStarFile(args.star_file)
 
 """
 For some operating systems the pyem starfile reader includes an underscore in the name.
@@ -76,7 +87,7 @@ for i in micrographs:
     good = []
     bad = []
     for j in data:
-        if shortest_distance(j[0], j[1], j[2], C[0], C[1], -1, C[2]) > float(p.threshold):
+        if shortest_distance(j[0], j[1], j[2], C[0], C[1], -1, C[2]) > float(args.threshold):
             bad.append(j)
             df_loc = df.loc[(df['CoordinateX'] == j[0]) & (df['CoordinateY'] == j[1]) & (df['DefocusV'] == j[2])]
             df = (df.drop(df_loc.index))
@@ -88,29 +99,35 @@ for i in micrographs:
 #    print(df)
 
     # For visual interpretation of points, uncomment
+    if args.showplot == True:    
+        # plot points and fitted surface
+        # Currently only showing removed particles
+        good = np.array(good)
+        bad = np.array(bad)
     
-    # plot points and fitted surface
-    # Currently only showing removed particles
-    good = np.array(good)
-    bad = np.array(bad)
-
-    if len(bad) == 0:  # This prevents an error if bad has length 0
-        pass
+        if len(bad) == 0:  # This prevents an error if bad has length 0
+            pass
+        else:
+            fig = plt.figure()
+            ax = fig.gca(projection='3d')
+            ax.plot_surface(X, Y, Z, rstride=1, cstride=1, alpha=0.2)
+            ax.scatter(bad[:,0], bad[:,1], bad[:,2], c='r', s=50)
+            ax.scatter(good[:,0], good[:,1], good[:,2], c='b', s=50)
+            plt.xlabel('MicrographX')
+            plt.ylabel('MicrographY')
+            ax.set_zlabel('Defocus')
+            ax.axis('equal')
+            ax.axis('tight')
+            ax.set_title(i) # Shows the micrograph title
+            print(i) # Since the micrograph title is often long also print it in terminal
+            plt.show()
     else:
-        fig = plt.figure()
-        ax = fig.gca(projection='3d')
-        ax.plot_surface(X, Y, Z, rstride=1, cstride=1, alpha=0.2)
-        ax.scatter(bad[:,0], bad[:,1], bad[:,2], c='r', s=50)
-        ax.scatter(good[:,0], good[:,1], good[:,2], c='b', s=50)
-        plt.xlabel('MicrographX')
-        plt.ylabel('MicrographY')
-        ax.set_zlabel('Defocus')
-        ax.axis('equal')
-        ax.axis('tight')
-        ax.set_title(i) # Shows the micrograph title
-        print(i) # Since the micrograph title is often long also print it in terminal
-        plt.show()
-   
+      pass   
 
-WriteStarFile(p.star_file + '_bad.star', bad_df)
-WriteStarFile(p.star_file + '_good.star', df)
+print(df.columns)
+df.columns = ['rln' + str(col) for col in df.columns]
+bad_df.columns = ['rln' + str(col) for col in bad_df.columns]
+print(df.columns)
+
+WriteStarFile(args.star_file + '_bad.star', bad_df)
+WriteStarFile(args.star_file + '_good.star', df)

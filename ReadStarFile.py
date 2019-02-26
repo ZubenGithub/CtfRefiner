@@ -10,7 +10,6 @@
 ## 3. REMOVE bad particles based on defocus  (need to work out what that means)
 ## 4. SAVE exaclty same star file (same header etc) but just missing those bad particles
 
-
 from pyem import star
 import re
 
@@ -47,6 +46,3 @@ def WriteStarFile(star_file, df):
         Star file destination, pandas dataframe
     """
     return star.write_star(star_file, df)
-
-#df= ReadStarFile(star_file)
-#print(df.columns)
