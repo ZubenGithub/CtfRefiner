@@ -1,11 +1,38 @@
-"""
-  StarRefiner.py
-
-  After the per particle defocus has been estimated the general plane
-  that all particles lie upon. Then particles that are some threshold
-  outside that plane can be removed.
-
-"""
+# ------------------------------------------------------------------
+#+
+#+ IMPLEMENTATION
+#+
+#+    Authors:  Zuben P. Brown & Shayan Huda Chowdhury
+#+    Title:    Particle refiner for tilt data
+#+    Version:  1.0
+#+    GitHub:   https://github.com/ZubenGithub/TiltRefiner
+#+
+#+ DESCRIPTION
+#+
+#+   Script for removing particles after per-particle defocus estimation that
+#+    lie some threshold away from a plane defined by all particles.
+# ------------------------------------------------------------------
+# HISTORY
+#    2019/02/26 -- 
+# ------------------------------------------------------------------
+#%
+#% Usage: /path/to/python TiltRefiner.py StarFile.star
+#%
+#% Options:
+#%                            (default)
+#%  --star_file     None    Star file with micrograph data (default: None)
+#%  --MicrographX   5760    Micrograph image X size (pixels). Default is for K3 image
+#%  --MicrographY   4092    Micrograph image Y size (pixels).
+#%  --threshold     1000    Threshold in Angstroms for filtering out "bad" particles. Should correspond to thickness of ice.
+#%  --showploti     False   Plot micrographs that contain any particles outside threshold. Useful for finding appropriate threshold
+#%  --test          False   Shows the fist 10 micrographs with particles outside the threshold. Should be useful for determining the threshold range.
+#%
+#% Comments
+#%
+#%      Finds a plane for all particles and excludes any that fall outside
+#%      some threshold (that should be approx. ice thickness).
+#%      Requires pyem package from: https://github.com/asarnow/pyem/wiki/Install-pyem
+# ------------------------------------------------------------------
 
 from ReadStarFile import ReadStarFile, WriteStarFile
 import argparse
@@ -25,17 +52,38 @@ import math
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-parser.add_argument('--star_file', help='Star file with micrograph data', required=True)
-parser.add_argument('--MicrographX', help='Micrograph image X size (pixels). Default is for K3 image.', default='5760')
-parser.add_argument('--MicrographY', help='Micrograph image Y size (pixels)', default='4092')
-parser.add_argument('--threshold',
-                  help='Threshold in Angstroms for filtering out "bad" particles. Should correspond to thickness of ice.',
-                  default=(1000),
-                  type=int)
-parser.add_argument('--showplot',
-                  help='Plot micrographs that contain any particles outside threshold. Useful for finding appropriate threshold',
-                  action="store_true",
-                  default=False)
+parser.add_argument(
+                    '--star_file',
+                    help='Star file with micrograph data',
+                    required=True)
+parser.add_argument(
+                    '--MicrographX',
+                    help='Micrograph image X size (pixels). Default is for K3 image.',
+                    default='5760')
+parser.add_argument(
+                    '--MicrographY',
+                    help='Micrograph image Y size (pixels)',
+                    default='4092')
+parser.add_argument(
+                    '--threshold',
+                    help='''Threshold in Angstroms for filtering out "bad"
+                     particles. Should correspond to thickness of ice.''',
+                    default=(1000),
+                    type=int)
+parser.add_argument(
+                    '--showplot',
+                    help='''Plot micrographs that contain any particles outside
+                     threshold. Useful for finding appropriate threshold and 
+                    visually checking which particles are being removed.''',
+                    action="store_true",
+                    default=False)
+parser.add_argument(
+                    '--test',
+                    help='''Shows the fist 10 micrographs with particles outside
+                    the threshold. Should be useful for determining the threshold range.''',
+                    action="store_true",
+                    required=False,
+                    default=False)
 
 args = parser.parse_args()
 
@@ -64,6 +112,9 @@ for i in arr:
     if i[0] not in micrographs:
         micrographs[i[0]] = []
     micrographs[i[0]].append(i[1:4])
+
+# This is a counter for testing the threshold value
+test_counter = 0
 
 for i in micrographs:
     data = np.array(micrographs[i], dtype=np.float)
@@ -103,6 +154,10 @@ for i in micrographs:
 #    print(df)
 
     # For visual interpretation of points, uncomment
+    if args.test == True:
+      args.showplot = True
+    else:
+      pass
     if args.showplot == True:    
         # plot points and fitted surface
         # Currently only showing removed particles
@@ -115,8 +170,14 @@ for i in micrographs:
             fig = plt.figure()
             ax = fig.gca(projection='3d')
             ax.plot_surface(X, Y, Z, rstride=1, cstride=1, alpha=0.2)
-            ax.scatter(bad[:,0], bad[:,1], bad[:,2], c='r', s=50)
-            ax.scatter(good[:,0], good[:,1], good[:,2], c='b', s=50)
+            try:
+              ax.scatter(bad[:,0], bad[:,1], bad[:,2], c='r', s=50)
+            except IndexError:
+              pass
+            try:
+              ax.scatter(good[:,0], good[:,1], good[:,2], c='b', s=50)
+            except IndexError:
+              pass
             plt.xlabel('MicrographX')
             plt.ylabel('MicrographY')
             ax.set_zlabel('Defocus')
@@ -125,13 +186,20 @@ for i in micrographs:
             ax.set_title(i) # Shows the micrograph title
             print(i) # Since the micrograph title is often long also print it in terminal
             plt.show()
+            if args.test == True:
+                test_counter=test_counter + 1
+                if test_counter == 11:
+                    break
+                else:
+                    pass
     else:
       pass   
 
-print(df.columns)
+# Relion headers have the format of:
+# _rlnHEADERNAME
+# This adds the 'rln' string so that they are saved correctly
 df.columns = ['rln' + str(col) for col in df.columns]
 bad_df.columns = ['rln' + str(col) for col in bad_df.columns]
-print(df.columns)
 
-WriteStarFile(args.star_file + '_bad.star', bad_df)
-WriteStarFile(args.star_file + '_good.star', df)
+WriteStarFile(args.star_file + '_threshold{0}_bad.star'.format(args.threshold), bad_df)
+WriteStarFile(args.star_file + '_threshold{0}_good.star'.format(args.threshold), df)
