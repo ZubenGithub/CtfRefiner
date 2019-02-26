@@ -4,7 +4,7 @@
 #+
 #+    Authors:  Zuben P. Brown & Shayan Huda Chowdhury
 #+    Title:    Particle refiner for tilt data
-#+    Version:  1.0
+#+    Version:  0.1 
 #+    GitHub:   https://github.com/ZubenGithub/TiltRefiner
 #+
 #+ DESCRIPTION
@@ -150,9 +150,6 @@ for i in micrographs:
         else:
             good.append(j)
 
-#    print(bad_df)
-#    print(df)
-
     # For visual interpretation of points, uncomment
     if args.test == True:
       args.showplot = True
@@ -189,15 +186,17 @@ for i in micrographs:
             if args.test == True:
                 test_counter=test_counter + 1
                 if test_counter == 11:
-                    break
+                    exit()
                 else:
                     pass
     else:
       pass   
 
-# Relion headers have the format of:
-# _rlnHEADERNAME
-# This adds the 'rln' string so that they are saved correctly
+"""
+ Relion headers have the format of:
+ _rlnHEADERNAME
+ This adds the 'rln' string so that they are saved correctly
+"""
 df.columns = ['rln' + str(col) for col in df.columns]
 bad_df.columns = ['rln' + str(col) for col in bad_df.columns]
 
