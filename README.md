@@ -1,6 +1,6 @@
 # CtfRefiner
 
-Relion 3 CTf Refine compares projections from a refinement model to each particle
+Relion 3 CTF Refine compares projections from a refinement model to each particle
 and by applying noise and a CTF can estimate individual defocus values.
 
 If a particle does not resemble the refinement model (i.e., it is not really 
