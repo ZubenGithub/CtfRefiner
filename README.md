@@ -1,7 +1,16 @@
 # CtfRefiner
-Finds a plane that fits the defocus values for all particles and removes particles that fall outside of some distance threshold.
 
-Requires CtfRefine to be run or per-particle-defocus.
+Relion 3 CTf Refine compares projections from a refinement model to each particle
+and by applying noise and a CTF can estimate individual defocus values.
+
+If a particle does not resemble the refinement model (i.e., it is not really 
+the same type of particle) then it may need to have a much larger defocus value
+applied to cause the projection/particle to match.
+
+By finding a plane that fits all particle defocus values for each micrograph 
+it is possible to identify particles that are outside some distance threshold 
+and remove them (since they have a defocus that is very different from all their
+siblings).
 
 # Instructions
 This requires pyem to read starfiles. Install that from:
