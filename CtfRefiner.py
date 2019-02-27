@@ -5,7 +5,7 @@
 #+    Authors:  Zuben P. Brown & Shayan Huda Chowdhury
 #+    Title:    Particle refiner for tilt data
 #+    Version:  0.1 
-#+    GitHub:   https://github.com/ZubenGithub/TiltRefiner
+#+    GitHub:   https://github.com/ZubenGithub/CtfRefiner
 #+
 #+ DESCRIPTION
 #+
@@ -13,10 +13,10 @@
 #+    lie some threshold away from a plane defined by all particles.
 # ------------------------------------------------------------------
 # HISTORY
-#    2019/02/26 -- 
+#    2019/02/27 -- First release
 # ------------------------------------------------------------------
 #%
-#% Usage: /path/to/python TiltRefiner.py StarFile.star
+#% Usage: /path/to/python CtfRefiner.py --star_file StarFile.star
 #%
 #% Options:
 #%                            (default)
@@ -166,6 +166,8 @@ for i in micrographs:
     # evaluate it on grid
     Z = C[0]*X + C[1]*Y + C[2]
     print ('%f x + %f y + %f = z' % (C[0], C[1], C[2]))
+    print(test_counter)
+    test_counter +=1
 
     def shortest_distance(x1, y1, z1, a, b, c, d):  
         d = abs((a * x1 + b * y1 + c * z1 + d))  
