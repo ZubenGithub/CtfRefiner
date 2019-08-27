@@ -10,10 +10,12 @@
 #+ DESCRIPTION
 #+
 #+   Script for removing particles after per-particle defocus estimation that
-#+    lie some threshold away from a plane defined by all particles.
+#+    lie some threshold away from a plane defined by all particles in a
+#+    single micrograph.
 # ------------------------------------------------------------------
 # HISTORY
 #    2019/02/27 -- First release
+#    2019/08/27 -- Fixed small errors
 # ------------------------------------------------------------------
 #%
 #% Usage: /path/to/python CtfRefiner.py --star_file StarFile.star
@@ -24,7 +26,7 @@
 #%  --MicrographX   5760    Micrograph image X size (pixels). Default is for K3 image
 #%  --MicrographY   4092    Micrograph image Y size (pixels).
 #%  --threshold     1000    Threshold in Angstroms for filtering out "bad" particles. Should correspond to thickness of ice.
-#%  --showploti     False   Plot micrographs that contain any particles outside threshold. Useful for finding appropriate threshold
+#%  --showplot      False   Plot micrographs that contain any particles outside threshold. Useful for finding appropriate threshold
 #%  --test          False   Shows the fist 10 micrographs with particles outside the threshold. Should be useful for determining the threshold range.
 #%
 #% Comments
@@ -221,7 +223,7 @@ for i in micrographs:
             plt.show()
             if args.test == True:
                 test_counter=test_counter + 1
-                if test_counter == 11:
+                if test_counter > 11:
                     exit()
                 else:
                     pass
